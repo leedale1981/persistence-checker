@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void PrintRegLocation(HKEY key, LPCWSTR location)
+void PrintRegLocation(const HKEY key, const LPCWSTR location)
 {
     HKEY hlcuRunKey;
     LONG result = RegOpenKeyEx(
@@ -49,14 +49,13 @@ void PrintRegLocation(HKEY key, LPCWSTR location)
         DWORD    cbSecurityDescriptor; // size of security descriptor 
         FILETIME ftLastWriteTime;
 
-        TCHAR achValue[MAX_VALUE_NAME]; 
         DWORD cchValue = MAX_VALUE_NAME; 
         
         result = RegQueryInfoKey(
                     hlcuRunKey,                    // key handle 
                     achClass,                // buffer for class name 
                     &cchClassName,           // size of class string 
-                    NULL,                    // reserved 
+                    nullptr,                    // reserved 
                     &cSubKeys,               // number of subkeys 
                     &cbMaxSubKey,            // longest subkey size 
                     &cchMaxClass,            // longest class string 
@@ -70,12 +69,13 @@ void PrintRegLocation(HKEY key, LPCWSTR location)
         {
             if (cValues)
             {
-                std::cout << "Number of values: " << cValues << std::endl;
+	            TCHAR achValue[MAX_VALUE_NAME];
+	            std::cout << "Number of values: " << cValues << std::endl;
                 
                 for (DWORD index = 0; index < cValues; index++) 
                 {
-                    char* data = new char[cbMaxValueData];
-                    LPDWORD dataSize = (LPDWORD)malloc(cbMaxValueData);
+                    char* data = new char[static_cast<size_t>(cbMaxValueData)];
+                    const LPDWORD dataSize = (LPDWORD)malloc(static_cast<size_t>(cbMaxValueData));
                     data[0] = '\0';
                     cchValue = MAX_VALUE_NAME; 
                     achValue[0] = '\0';
@@ -84,9 +84,9 @@ void PrintRegLocation(HKEY key, LPCWSTR location)
                         hlcuRunKey,
                         index, 
                         achValue, 
-                        &cchValue, 
-                        NULL,
-                        NULL,
+                        &cchValue,
+                        nullptr,
+                        nullptr,
                         LPBYTE(data),
                         dataSize); 
                         
@@ -96,7 +96,7 @@ void PrintRegLocation(HKEY key, LPCWSTR location)
                         std::wstring value_wstr = achValue;
                         std::string value_str(value_wstr.begin(), value_wstr.end());
 
-                        std:std::wstring data_wstr = std::wstring((wchar_t*)data);
+                        std::wstring data_wstr = std::wstring((wchar_t*)data);
                         std::string data_str(data_wstr.begin(), data_wstr.end());
                         
                         std::cout << value_str << " = " << data_str << std::endl;
